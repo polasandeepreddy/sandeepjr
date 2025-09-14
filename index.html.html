@@ -1,0 +1,3919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Property Valuation Form with Conditional Fields</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 15px;
+            font-weight: 300;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 50px;
+            padding: 30px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-icon {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            align-items: start;
+        }
+
+        .form-col {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .btn-add {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            margin-top: 15px;
+        }
+
+        .btn-add:hover {
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+        }
+
+        .btn-generate {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            margin-top: 20px;
+        }
+
+        .btn-generate:hover {
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .boundaries {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e1e5e9;
+        }
+
+        .boundaries > div {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .boundaries label {
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .popup-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .popup-header {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: #2c3e50;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+        }
+
+        .close-popup {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s ease;
+        }
+
+        .close-popup:hover {
+            color: #e74c3c;
+        }
+
+        .generated-sentence {
+            background: linear-gradient(135deg, #d5f4e6, #c8e6c9);
+            border: 2px solid #27ae60;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 25px;
+            font-style: italic;
+            color: #1b5e20;
+            font-weight: 500;
+            box-shadow: 0 4px 8px rgba(39, 174, 96, 0.2);
+        }
+
+        .building-item {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            border: 2px solid #ff9800;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(255, 152, 0, 0.2);
+        }
+
+        .building-item .remove-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .building-item .remove-btn:hover {
+            background: #c0392b;
+            transform: scale(1.1);
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        .doc-item {
+            background: white;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .doc-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3498db, #2980b9);
+        }
+
+        .doc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e1e5e9;
+        }
+
+        .doc-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .remove-doc-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .remove-doc-btn:hover {
+            background: #c0392b;
+            transform: translateY(-1px);
+        }
+
+        .submit-section {
+            text-align: center;
+            margin-top: 50px;
+            padding: 30px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 20px 50px;
+            font-size: 18px;
+            border-radius: 50px;
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .boundaries {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                margin: 10px;
+            }
+            
+            .header {
+                padding: 25px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .form-container {
+                padding: 25px;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+            
+            .popup-content {
+                padding: 25px;
+                margin: 20px;
+            }
+        }
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Success message */
+        .success-message {
+            background: linear-gradient(135deg, #d5f4e6, #c8e6c9);
+            border: 2px solid #27ae60;
+            color: #1b5e20;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+
+        /* Buildings container styling */
+        .buildings-container {
+            margin-top: 20px;
+        }
+
+        .buildings-container label {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: block;
+        }
+                /* Same style from maincode.txt */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 15px;
+            font-weight: 300;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 50px;
+            padding: 30px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-icon {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            align-items: start;
+        }
+
+        .form-col {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .submit-section {
+            text-align: center;
+            margin-top: 50px;
+            padding: 30px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+        }
+
+        /* Popup Styling */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .popup-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .popup h3 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .close-popup {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #888;
+        }
+
+        .close-popup:hover {
+            color: #e74c3c;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+            border: 1px solid #c3e6cb;
+        }
+        /* General Styling */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      background: #fff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .header {
+      text-align: center;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 30px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    .header h1 { font-size: 2.5em; }
+    .section {
+      margin-bottom: 30px;
+      border: 2px solid #e1e5e9;
+      border-radius: 12px;
+      background: #f8f9fa;
+      padding: 20px;
+      position: relative;
+    }
+    .section-title {
+      font-size: 1.5em;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 8px;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 15px;
+    }
+    label {
+      font-weight: 600;
+      margin-bottom: 5px;
+      display: block;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    textarea { min-height: 100px; resize: vertical; }
+    input:focus, select:focus, textarea:focus {
+      border-color: #3498db;
+      outline: none;
+      box-shadow: 0 0 5px rgba(52,152,219,0.2);
+    }
+    .boundaries-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 15px;
+    }
+    .boundary-group label {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .boundary-group input {
+      margin-bottom: 10px;
+    }
+    .btn {
+      padding: 10px 25px;
+      background: linear-gradient(135deg, #3498db, #2980b9);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .btn:hover {
+      box-shadow: 0 5px 10px rgba(52,152,219,0.4);
+    }
+    .submit-section {
+      text-align: center;
+      margin-top: 30px;
+    }
+    .hidden { display: none; }
+    .document-block {
+      border: 2px dashed #ccc;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+    /* ---------- GLOBAL STYLES ---------- */
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f4f7fb;
+      margin: 0;
+      padding: 20px;
+      color: #222;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    h1, h2 {
+      color: #3478d6;
+      margin-top: 15px;
+      margin-bottom: 10px;
+      text-align: left;
+      font-weight: 700;
+    }
+
+    /* ---------- FORM GRID LAYOUT ---------- */
+    .grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      margin-bottom: 15px;
+    }
+
+    /* ---------- FORM ELEMENTS ---------- */
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 14px;
+      background: #fff;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    select:focus,
+    textarea:focus {
+      border-color: #3478d6;
+      outline: none;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .readonly {
+      background: #f1f5f9;
+      color: #555;
+    }
+
+    /* ---------- BUTTONS ---------- */
+    .btn {
+      background: #3478d6;
+      color: white;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.2s;
+      display: inline-block;
+    }
+
+    .btn.add {
+      background: #10b981;
+    }
+
+    .btn.remove {
+      background: #ef4444;
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+    }
+
+    /* ---------- SECTIONS ---------- */
+    .section {
+      padding: 20px;
+      background: #f9fafb;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    /* ---------- TABLE STYLING ---------- */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid #e2e8f0;
+      text-align: center;
+      padding: 10px;
+    }
+
+    th {
+      background: #e9f2ff;
+      font-weight: 600;
+      color: #333;
+    }
+
+    td input {
+      width: 100%;
+      border: none;
+      text-align: center;
+      padding: 8px;
+      font-size: 14px;
+      background: transparent;
+    }
+
+    td input:focus {
+      outline: 1px solid #3478d6;
+      border-radius: 4px;
+    }
+
+    /* ---------- RESPONSIVE ---------- */
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+       /* Same style from maincode.txt */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 15px;
+            font-weight: 300;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .section {
+            margin-bottom: 50px;
+            padding: 30px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-icon {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            align-items: start;
+        }
+
+        .form-col {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .submit-section {
+            text-align: center;
+            margin-top: 50px;
+            padding: 30px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+        }
+
+        /* Popup Styling */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .popup-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .popup h3 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .close-popup {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #888;
+        }
+
+        .close-popup:hover {
+            color: #e74c3c;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+            border: 1px solid #c3e6cb;
+        }
+          /* General Styling */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      background: #fff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    .header {
+      text-align: center;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 30px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    .header h1 { font-size: 2.5em; }
+    .section {
+      margin-bottom: 30px;
+      border: 2px solid #e1e5e9;
+      border-radius: 12px;
+      background: #f8f9fa;
+      padding: 20px;
+      position: relative;
+    }
+    .section-title {
+      font-size: 1.5em;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 8px;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 15px;
+    }
+    label {
+      font-weight: 600;
+      margin-bottom: 5px;
+      display: block;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    textarea { min-height: 100px; resize: vertical; }
+    input:focus, select:focus, textarea:focus {
+      border-color: #3498db;
+      outline: none;
+      box-shadow: 0 0 5px rgba(52,152,219,0.2);
+    }
+    .boundaries-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 15px;
+    }
+    .boundary-group label {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .boundary-group input {
+      margin-bottom: 10px;
+    }
+    .btn {
+      padding: 10px 25px;
+      background: linear-gradient(135deg, #3498db, #2980b9);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .btn:hover {
+      box-shadow: 0 5px 10px rgba(52,152,219,0.4);
+    }
+    .submit-section {
+      text-align: center;
+      margin-top: 30px;
+    }
+    .hidden { display: none; }
+    .document-block {
+      border: 2px dashed #ccc;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+      /* Main layout & style (keeps look similar to your earlier design) */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg,#667eea,#764ba2);
+    padding: 20px;
+    color: #222;
+  }
+  .container {
+    max-width: 1200px;
+    margin: auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    overflow: hidden;
+  }
+  .header {
+    background: linear-gradient(135deg,#667eea,#764ba2);
+    color: #fff;
+    padding: 28px;
+    text-align: center;
+  }
+  .header h1 { font-weight: 400; font-size: 28px; }
+  .content { padding: 28px; }
+
+  .section {
+    border: 1px solid #e6e9ee;
+    padding: 18px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    background: linear-gradient(180deg,#fbfdff,#f4f7fb);
+  }
+  .section-title {
+    display:flex; align-items:center; gap:10px;
+    margin-bottom: 12px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #263241;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 8px;
+  }
+  label { display:block; margin-bottom:6px; font-weight:600; color:#2c3e50; }
+  input[type="text"], input[type="number"], input[type="date"], select, textarea {
+    width:100%; padding:10px; border:1px solid #d7dde6; border-radius:8px; margin-bottom:10px;
+    font-size:14px; background:#fff;
+  }
+  input[readonly], .readonly { background:#f2f4f7; pointer-events:none; }
+  textarea { min-height:80px; resize:vertical; }
+  .row { display:grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin-bottom:8px; }
+  .mini-row { display:flex; gap:8px; }
+  .btn { background: linear-gradient(135deg,#3498db,#2980b9); color:#fff; padding:10px 14px; border:none; border-radius:8px; cursor:pointer; font-weight:700; }
+  .btn.secondary { background:#6b7280; }
+  .muted { color:#6b7280; font-size:13px; margin-bottom:8px; }
+  .file-upload { padding:8px; border:1px dashed #cfd8e3; border-radius:8px; background:#fbfdff; }
+  .small { font-size:13px; color:#4b5563; }
+  table { width:100%; border-collapse:collapse; margin-top:8px; }
+  th, td { border:1px solid #e6e9ee; padding:8px; text-align:left; font-size:13px; vertical-align:middle; }
+  th { background:#f6f9ff; }
+  .chip { display:inline-block; padding:6px 10px; border-radius:20px; background:#eef2ff; color:#1f2937; margin-right:6px; font-size:13px; }
+  .danger { background:#ffe9e9; border:1px solid #ffcaca; color:#7b1d1d; padding:8px; border-radius:8px; }
+  .success { background:#e9f7ef; border:1px solid #cfead3; color:#14532d; padding:8px; border-radius:8px; }
+
+  /* controls */
+  .controls { display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; }
+  .remove-btn { background:#ef4444; color:#fff; border:none; border-radius:6px; padding:6px 8px; cursor:pointer; }
+  .add-btn { background:#10b981; color:#fff; border:none; border-radius:6px; padding:6px 8px; cursor:pointer; }
+  .small-muted { font-size:12px; color:#556074; }
+
+  @media (max-width:720px) {
+    .row { grid-template-columns: 1fr; }
+  }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Property Valuation Form</h1>
+            <p>Complete property assessment and documentation system</p>
+        </div>
+
+        <div class="form-container">
+            <form id="propertyForm">
+                <!-- Basic Information Section -->
+                <div class="section">
+                    <h2 class="section-title">
+                        <span class="section-icon">1</span>
+                        Basic Information
+                    </h2>
+                    
+                    <div class="form-row">
+                        <div class="form-col">
+                            <label for="propertyType">Type of Property *</label>
+                            <select id="propertyType" required>
+                                <option value="">Select Property Type</option>
+                                <option value="Land and Buildings">Land and Buildings</option>
+                                <option value="Flat">Flat</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-col">
+                            <label for="inspectionDate">Date of Inspection *</label>
+                            <input type="date" id="inspectionDate" required>
+                        </div>
+                        
+                        <div class="form-col">
+                            <label for="valuationDate">Date of Valuation *</label>
+                            <input type="date" id="valuationDate" required>
+                            <div id="dateError" class="error-message"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Property Documents Section -->
+                <div class="section">
+                    <h2 class="section-title">
+                        <span class="section-icon">2</span>
+                        Property Documents
+                    </h2>
+                    <div id="propertyDocsContainer">
+                        <div class="doc-item property-doc-item" data-doc-id="1">
+                            <div class="doc-header">
+                                <div class="doc-title">Property Document 1</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="selectDoc1">Select Document *</label>
+                                <select id="selectDoc1" class="doc-select" required>
+                                    <option value="">Select Document</option>
+                                    <option value="AOS">AOS</option>
+                                    <option value="SALE DEED">Sale Deed</option>
+                                    <option value="GIFT DEED">Gift Deed</option>
+                                    <option value="ANY DEED">Any Deed</option>
+                                </select>
+                            </div>
+
+                            <div id="docDetails1" class="doc-details"></div>
+                            <div id="generatedSentence1" class="generated-sentence hidden"></div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-add" onclick="addPropertyDoc()">+ Add Property Document</button>
+                </div>
+
+                <!-- Approval Documents Section -->
+                <div class="section">
+                    <h2 class="section-title">
+                        <span class="section-icon">3</span>
+                        Approval Documents
+                    </h2>
+                    <div id="approvalDocsContainer">
+                        <div class="doc-item approval-doc-item" data-doc-id="1">
+                            <div class="doc-header">
+                                <div class="doc-title">Approval Document 1</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="approvalDoc1">Select Building Approval Document *</label>
+                                <select id="approvalDoc1" class="approval-select" required>
+                                    <option value="">Select Document</option>
+                                    <option value="SANCTION PLAN">Sanction Plan</option>
+                                    <option value="NO PLAN CASE">No Plan Case</option>
+                                    <option value="BPS/BRS">BPS/BRS</option>
+                                    <option value="OC">OC</option>
+                                </select>
+                            </div>
+
+                            <div id="approvalDetails1" class="approval-details"></div>
+                            
+                            <div class="form-group">
+                                <label for="landApprovalDoc1">Select Land Approval Document</label>
+                                <select id="landApprovalDoc1" class="land-approval-select">
+                                    <option value="">Select Document</option>
+                                    <option value="LRS">LRS</option>
+                                    <option value="LAYOUT">Layout</option>
+                                    <option value="NALA">NALA</option>
+                                </select>
+                            </div>
+
+                            <div id="landApprovalDetails1" class="land-approval-details"></div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-add" onclick="addApprovalDoc()">+ Add Approval Document</button>
+                </div>
+
+                <div class="submit-section">
+                    <button type="submit" class="btn submit-btn">Submit Property Valuation Form</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sanction Body Popup -->
+    <div id="sanctionBodyPopup" class="popup">
+        <div class="popup-content">
+            <span class="close-popup" onclick="closePopup('sanctionBodyPopup')">&times;</span>
+            <div class="popup-header">Select Sanction Body</div>
+            <div class="form-group">
+                <label for="sanctionBodySelect">Sanction Body *</label>
+                <select id="sanctionBodySelect" required>
+                    <option value="">Select Sanction Body</option>
+                    <option value="GP">GP</option>
+                    <option value="DTCP">DTCP</option>
+                    <option value="GHMC DPMS">GHMC DPMS</option>
+                    <option value="HMDA DPMS">HMDA DPMS</option>
+                    <option value="TG BPASS">TG BPASS</option>
+                    <option value="GHMC-2016">GHMC-2016</option>
+                </select>
+            </div>
+            <button type="button" class="btn" onclick="selectSanctionBody()">Confirm Selection</button>
+        </div>
+    </div>
+
+    <!-- BPS/BRS Sanction Body Popup -->
+    <div id="bpsBrsPopup" class="popup">
+        <div class="popup-content">
+            <span class="close-popup" onclick="closePopup('bpsBrsPopup')">&times;</span>
+            <div class="popup-header">Select BPS/BRS Sanction Body</div>
+            <div class="form-group">
+                <label for="bpsBrsSelect">Sanction Body *</label>
+                <select id="bpsBrsSelect" required>
+                    <option value="">Select Sanction Body</option>
+                    <option value="GHMC">GHMC</option>
+                    <option value="HMDA">HMDA</option>
+                </select>
+            </div>
+            <button type="button" class="btn" onclick="selectBpsBrsBody()">Confirm Selection</button>
+        </div>
+    </div>
+
+    <!-- Local Body Popup -->
+    <div id="localBodyPopup" class="popup">
+        <div class="popup-content">
+            <span class="close-popup" onclick="closePopup('localBodyPopup')">&times;</span>
+            <div class="popup-header">Select Local Body</div>
+            <div class="form-group">
+                <label for="localBodySelect">Local Body *</label>
+                <select id="localBodySelect" required>
+                    <option value="">Select Local Body</option>
+                    <option value="GHMC">GHMC</option>
+                    <option value="CDMA">CDMA</option>
+                    <option value="GRAMPANCHAYATH">Grampanchayath</option>
+                </select>
+            </div>
+            <button type="button" class="btn" onclick="selectLocalBody()">Confirm Selection</button>
+        </div>
+    </div>
+    
+    <!-- OC  Body Popup -->
+    <div id="OCBodyPopup" class="popup">
+        <div class="popup-content">
+            <span class="close-popup" onclick="closePopup('sanctionBodyPopup')">&times;</span>
+            <div class="popup-header">Select Occupancy Certificate Body</div>
+            <div class="form-group">
+                <label for="OCBodySelect">Occupancy Certificate Body *</label>
+                <select id="sanctionBodySelect" required>
+                    <option value="">Select Occupancy Certificate  Body</option>
+                    <option value="DTCP">DTCP</option>
+                    <option value="GHMC DPMS">GHMC DPMS</option>
+                    <option value="HMDA DPMS">HMDA DPMS</option>
+                    <option value="TG BPASS">TG BPASS</option>
+                    <option value="GHMC-2016">GHMC-2016</option>
+                    <OPtion value="TGIIC">TGIIC</OPtion>
+                </select>
+            </div>
+            <button type="button" class="btn" onclick="selectSanctionBody()">Confirm Selection</button>
+        </div>
+    </div>
+
+    <!-- LRS Sanction Body Popup -->
+    <div id="lrsSanctionPopup" class="popup">
+        <div class="popup-content">
+            <span class="close-popup" onclick="closePopup('lrsSanctionPopup')">&times;</span>
+            <div class="popup-header">Select LRS Sanction Body</div>
+            <div class="form-group">
+                <label for="lrsSanctionSelect">Sanction Body *</label>
+                <select id="lrsSanctionSelect" required>
+                    <option value="">Select Sanction Body</option>
+                    <option value="GHMC">GHMC</option>
+                    <option value="HMDA">HMDA</option>
+                    <option value="MUNICIPALITY">Municipality</option>
+                </select>
+            </div>
+            <button type="button" class="btn" onclick="selectLrsSanctionBody()">Confirm Selection</button>
+        </div>
+    </div>
+
+    <!-- Layout Sanction Body Popup -->
+    <div id="layoutSanctionPopup" class="popup">
+        <div class="popup-content">
+            <span class="close-popup" onclick="closePopup('layoutSanctionPopup')">&times;</span>
+            <div class="popup-header">Select Layout Sanction Body</div>
+            <div class="form-group">
+                <label for="layoutSanctionSelect">Sanction Body *</label>
+                <select id="layoutSanctionSelect" required>
+                    <option value="">Select Sanction Body</option>
+                    <option value="HMDA FINAL LAYOUT">HMDA Final Layout</option>
+                    <option value="DTCP FINAL LAYOUT">DTCP Final Layout</option>
+                    <option value="GRAMPANCHAYATH LAYOUT">Grampanchayath Layout</option>
+                    <option value="DRAFT LAYOUT">Draft Layout</option>
+                </select>
+            </div>
+            <button type="button" class="btn" onclick="selectLayoutSanctionBody()">Confirm Selection</button>
+        </div>
+    </div>
+
+    <!-- Building Details Popup -->
+    <div id="buildingDetailsPopup" class="popup">
+        <div class="popup-content">
+            <span class="close-popup" onclick="closePopup('buildingDetailsPopup')">&times;</span>
+            <div class="popup-header">Add Building Details</div>
+            <div class="form-group">
+                <label for="buildingName">Building Name *</label>
+                <input type="text" id="buildingName" required>
+            </div>
+            <div class="form-group">
+                <label for="numberOfFloors">Number of Floors *</label>
+                <input type="number" id="numberOfFloors" min="1" required>
+            </div>
+            <div class="form-group">
+                <label for="buildingArea">Area (in Sft) *</label>
+                <input type="number" id="buildingArea" min="1" required>
+            </div>
+            <div style="display: flex; gap: 15px; justify-content: center;">
+                <button type="button" class="btn" onclick="addBuildingDetail()">Add Building</button>
+                <button type="button" class="btn btn-add" onclick="addMoreBuildings()">Add More Buildings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NALA Details Popup -->
+    <div id="nalaDetailsPopup" class="popup">
+        <div class="popup-content">
+            <span class="close-popup" onclick="closePopup('nalaDetailsPopup')">&times;</span>
+            <div class="popup-header">Enter NALA Details</div>
+            <div class="form-group">
+                <label for="nalaProceeding">Proceeding Number *</label>
+                <input type="text" id="nalaProceeding" required>
+            </div>
+            <div class="form-group">
+                <label for="nalaSyNo">SY NO *</label>
+                <input type="text" id="nalaSyNo" required>
+            </div>
+            <div class="form-group">
+                <label for="nalaSyExtent">SY NO Wise Extent (in numbers) *</label>
+                <input type="number" id="nalaSyExtent" step="0.01" required>
+            </div>
+            <button type="button" class="btn" onclick="addNalaDetails()">Add NALA Details</button>
+        </div>
+    </div>
+
+    <div class="container">
+    <div class="header">
+        <h1>Property Valuation Form</h1>
+        <p>Complete property assessment and documentation system</p>
+    </div>
+
+    <div class="form-container">
+        <form id="propertyForm">
+            <!-- Section 3: Utility Bill -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="section-icon">4</span>
+                    Utility Bill
+                </h2>
+
+                <div class="form-group">
+                    <label for="utilityBillType">Select Utility Bill *</label>
+                    <select id="utilityBillType" onchange="handleUtilityBillChange()">
+                        <option value="">-- Select Utility Bill --</option>
+                        <option value="Electricity">Electricity Bill</option>
+                        <option value="Water">Water Bill</option>
+                    </select>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div>
+        <form id="valuationForm">
+            <!-- Section 5: Additional Documents -->
+            <div class="section">
+            <div class="section-title">5. Additional Documents</div>
+            <textarea id="additionalDocs" placeholder="Enter any additional document details..."></textarea>
+            </div>
+
+            <!-- Section 6: Location -->
+            <div class="section">
+            <div class="section-title">6. Location Details</div>
+
+            <!-- State, District, Mandal, Village -->
+            <div class="form-row">
+                <div>
+                <label for="state">State *</label>
+                <select id="state" required>
+                    <option value="">Select State</option>
+                    <option value="Telangana">Telangana</option>
+                    <option value="Andhra Pradesh">Andhra Pradesh</option>
+                </select>
+                </div>
+                <div>
+                <label for="district">District *</label>
+                <select id="district" required>
+                    <option value="">Select District</option>
+                </select>
+                </div>
+                <div>
+                <label for="mandal">Mandal *</label>
+                <select id="mandal" required>
+                    <option value="">Select Mandal</option>
+                </select>
+                </div>
+                <div>
+                <label for="village">Village *</label>
+                <select id="village" required>
+                    <option value="">Select Village</option>
+                </select>
+                </div>
+            </div>
+
+            <!-- Sy Nos, Plot, Building, House, Pincode -->
+            <div class="form-row">
+                <div>
+                <label for="syNos">Sy Nos *</label>
+                <input type="text" id="syNos" placeholder="Enter Sy Nos" required>
+                </div>
+                <div>
+                <label for="plotNo">Plot No *</label>
+                <input type="text" id="plotNo" placeholder="Enter Plot No" required>
+                </div>
+                <div>
+                <label for="buildingName">Building Name (Optional)</label>
+                <input type="text" id="buildingName">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div>
+                <label for="houseNo">House No (Optional)</label>
+                <input type="text" id="houseNo">
+                </div>
+                <div>
+                <label for="pincode">Pincode *</label>
+                <input type="number" id="pincode" placeholder="Enter Pincode" required>
+                </div>
+            </div>
+
+            <!-- Flat Section -->
+            <div class="form-row">
+                <div>
+                <label for="apartmentName">Apartment Name</label>
+                <input type="text" id="apartmentName">
+                </div>
+                <div>
+                <label for="flatNo">Flat No</label>
+                <input type="text" id="flatNo">
+                </div>
+                <div>
+                <label for="floor">Floor in Which Situated</label>
+                <input type="text" id="floor">
+                </div>
+            </div>
+
+            <!-- Land Boundaries -->
+            <h3>Land Boundaries and Dimensions</h3>
+            <div class="boundaries-container">
+                <div class="boundary-group">
+                <label>Boundaries as per Document</label>
+                <input type="text" placeholder="North">
+                <input type="text" placeholder="South">
+                <input type="text" placeholder="East">
+                <input type="text" placeholder="West">
+                </div>
+                <div class="boundary-group">
+                <label>Dimensions as per Document</label>
+                <input type="text" placeholder="North">
+                <input type="text" placeholder="South">
+                <input type="text" placeholder="East">
+                <input type="text" placeholder="West">
+                </div>
+            </div>
+
+            <!-- Add Multiple Plots Section -->
+            <div id="plotDocuments">
+                <div class="document-block">
+                <h4>Plot Document 1</h4>
+                <div class="form-row">
+                    <div><input type="text" placeholder="North Boundary"></div>
+                    <div><input type="text" placeholder="South Boundary"></div>
+                    <div><input type="text" placeholder="East Boundary"></div>
+                    <div><input type="text" placeholder="West Boundary"></div>
+                </div>
+                </div>
+            </div>
+            <button type="button" class="btn" onclick="addPlotDocument()">+ Add Another Plot Document</button>
+
+            <!-- Apartment Boundaries -->
+            <h3 style="margin-top:20px;">Apartment Boundaries and Dimensions</h3>
+            <div class="boundaries-container">
+                <div class="boundary-group">
+                <label>Boundaries as per Document</label>
+                <input type="text" placeholder="North">
+                <input type="text" placeholder="South">
+                <input type="text" placeholder="East">
+                <input type="text" placeholder="West">
+                </div>
+                <div class="boundary-group">
+                <label>Dimensions as per Document</label>
+                <input type="text" placeholder="North">
+                <input type="text" placeholder="South">
+                <input type="text" placeholder="East">
+                <input type="text" placeholder="West">
+                </div>
+            </div>
+
+            <!-- Flat Boundaries -->
+            <h3 style="margin-top:20px;">Flat Boundaries and Dimensions</h3>
+            <div class="boundaries-container">
+                <div class="boundary-group">
+                <label>Boundaries as per Document</label>
+                <input type="text" placeholder="North">
+                <input type="text" placeholder="South">
+                <input type="text" placeholder="East">
+                <input type="text" placeholder="West">
+                </div>
+                <div class="boundary-group">
+                <label>Dimensions as per Document</label>
+                <input type="text" placeholder="North">
+                <input type="text" placeholder="South">
+                <input type="text" placeholder="East">
+                <input type="text" placeholder="West">
+                </div>
+            </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="container">
+    <div class="content">
+        <form id="valuationForm">
+        <!-- ====== ONLINE CHECKS ====== -->
+        <div class="section" id="onlineChecksSection">
+            <div class="section-title"><span class="chip">7</span> Online Checks (Upload evidence before inspection)</div>
+            <p class="muted">Upload evidence files for each category. Multiple files allowed. All categories are mandatory before submission.</p>
+
+            <div class="file-upload-group">
+            <label>EC (Encumbrance Certificate)</label>
+            <div class="file-upload"><input id="ecFiles" type="file" multiple></div>
+            </div>
+
+            <div class="file-upload-group">
+            <label>PROHIBITED LIST</label>
+            <div class="file-upload"><input id="prohibitedFiles" type="file" multiple></div>
+            </div>
+
+            <div class="file-upload-group">
+            <label>GLV</label>
+            <div class="file-upload"><input id="glvFiles" type="file" multiple></div>
+            </div>
+
+            <div class="file-upload-group">
+            <label>ISRO BHUVAN SY NO CONFIRMATION</label>
+            <div class="file-upload"><input id="isroFiles" type="file" multiple></div>
+            </div>
+
+            <div class="file-upload-group">
+            <label>MASTER PLAN</label>
+            <div class="file-upload"><input id="masterPlanFiles" type="file" multiple></div>
+            </div>
+
+            <div class="file-upload-group">
+            <label>ONLINE REFERENCES</label>
+            <div class="file-upload"><input id="onlineRefFiles" type="file" multiple></div>
+            </div>
+        </div>
+
+        <!-- ====== SITE DATA REVIEW ====== -->
+        <div class="section" id="siteDataSection">
+            <div class="section-title"><span class="chip">8</span> Site Data Review</div>
+            <p class="muted">Data pulled from site inspection (read-only). Mark inspection completed to view.</p>
+
+            <div class="row">
+            <div>
+                <label for="inspectionCompleted">Inspection Completed?</label>
+                <select id="inspectionCompleted">
+                <option value="false">No</option>
+                <option value="true">Yes</option>
+                </select>
+                <div class="small-muted">If 'Yes' the Site Data area will be displayed and date locked.</div>
+            </div>
+
+            <div>
+                <label for="inspectionDate">Date of Inspection</label>
+                <input id="inspectionDate" type="date" class="readonly" readonly>
+            </div>
+            </div>
+
+            <div id="siteDataBox" class="site-data-box hidden">
+            <div class="success"><strong>Site observations (pulled from valuator):</strong>
+                <ul id="siteObservations" style="margin-top:8px"></ul>
+            </div>
+            </div>
+        </div>
+
+        <!-- ====== PROPERTY DETAILS ====== -->
+        <div class="section" id="propertyDetailsSection">
+            <div class="section-title"><span class="chip">9</span> Property Details</div>
+
+            <div class="row">
+            <div>
+                <label for="propertyType">Property Type</label>
+                <select id="propertyType">
+                <option value="">Select</option>
+                <option>Land & Buildings</option>
+                <option>Flat</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="stageConstruction">Stage of Construction</label>
+                <select id="stageConstruction">
+                <option value="">Select</option>
+                <option value="Completed">Completed</option>
+                <option value="Under Construction">Under Construction</option>
+                </select>
+                <div class="small-muted">If 'Under Construction' you'll get progress % columns in floor table.</div>
+            </div>
+
+            <div>
+                <label for="coordinates">Coordinates</label>
+                <input id="coordinates" type="text" placeholder="e.g. 17.3850° N, 78.4867° E">
+            </div>
+
+            <div>
+                <label for="nearbyLandmark">Nearby Landmark</label>
+                <input id="nearbyLandmark" type="text" placeholder="Landmark name">
+            </div>
+            </div>
+
+            <div class="row">
+            <div><label for="nearbyRail">Nearby Railway Station</label><input id="nearbyRail" type="text"></div>
+            <div><label for="railDistance">Distance from property (km)</label><input id="railDistance" type="number" step="0.01"></div>
+            <div><label for="nearbyBus">Nearby Bus Stop</label><input id="nearbyBus" type="text"></div>
+            <div><label for="busDistance">Distance from property (km)</label><input id="busDistance" type="number" step="0.01"></div>
+            </div>
+
+            <div class="row">
+            <div><label for="nearbyHospital">Nearby Hospital</label><input id="nearbyHospital" type="text"></div>
+            <div><label for="hospitalDistance">Distance from property (km)</label><input id="hospitalDistance" type="number" step="0.01"></div>
+            <div><label for="distanceCity">Distance from City Center (km)</label><input id="distanceCity" type="number" step="0.01"></div>
+            <div><label for="numFloors">No. of Floors</label><input id="numFloors" type="number" min="0"></div>
+            </div>
+
+            <div class="row">
+            <div><label for="unitsPerFloor">No. of Units in Each Floor (comma separated)</label><input id="unitsPerFloor" type="text" placeholder="e.g. 2,2,1"></div>
+            <div><label for="totalUnits">Total No. of Units</label><input id="totalUnits" type="number" min="0"></div>
+            <div><label for="internalComposition">Internal Composition Unit Wise</label><input id="internalComposition" type="text" placeholder="e.g. 2BHK,1BHK ..."></div>
+            <div>
+                <label for="occupancyStatus">Occupancy Status</label>
+                <select id="occupancyStatus">
+                <option value="">Select</option>
+                <option>Under Construction</option>
+                <option>Vacant</option>
+                <option>Rented</option>
+                <option>Self Occupied</option>
+                <option>Self Occupied and Rented</option>
+                <option>Self Occupied and Vacant</option>
+                <option>Rented and Vacant</option>
+                </select>
+            </div>
+            </div>
+
+            <!-- Floor-wise table -->
+            <div style="margin-top:12px">
+            <label>Floor-wise & Unit-wise Details</label>
+            <div class="muted small">Add floors. If stage = Under Construction you'll see a Progress % column.</div>
+            <table id="floorTable">
+                <thead>
+                <tr id="floorHeadRow">
+                    <th>#</th>
+                    <th>Floor Name</th>
+                    <th>No. of Units</th>
+                    <th>Occupancy (units status summary)</th>
+                    <th>Rental Value (per unit or floor)</th>
+                    <!-- progress column inserted dynamically for Under Construction -->
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <div class="controls">
+                <button type="button" class="add-btn" id="addFloorBtn">+ Add Floor</button>
+                <button type="button" class="secondary btn" onclick="autoFillUnits()">Auto-fill total units</button>
+            </div>
+            </div>
+
+            <!-- Rental Value summary -->
+            <div style="margin-top:14px">
+            <label>Rental Value (overall comments)</label>
+            <input id="rentalValue" type="text" placeholder="e.g. Expected rent / month">
+            </div>
+
+            <!-- Land boundaries -->
+            <div style="margin-top:14px">
+            <label>Land Boundaries and Dimensions (Actual)</label>
+            <div class="row">
+                <div><label>North (Boundary)</label><input id="landNorth" type="text"></div>
+                <div><label>North (Dimensions)</label><input id="dimNorth" type="text"></div>
+                <div><label>South (Boundary)</label><input id="landSouth" type="text"></div>
+                <div><label>South (Dimensions)</label><input id="dimSouth" type="text"></div>
+            </div>
+            <div class="row">
+                <div><label>East (Boundary)</label><input id="landEast" type="text"></div>
+                <div><label>East (Dimensions)</label><input id="dimEast" type="text"></div>
+                <div><label>West (Boundary)</label><input id="landWest" type="text"></div>
+                <div><label>West (Dimensions)</label><input id="dimWest" type="text"></div>
+            </div>
+            </div>
+
+            <!-- Multiple plot documents -->
+            <div style="margin-top:14px">
+            <label>Plot Documents (multiple documents allowed)</label>
+            <div id="plotDocsContainer"></div>
+            <div class="controls">
+                <button type="button" class="add-btn" id="addPlotDocBtn">+ Add Plot Document</button>
+            </div>
+            <div class="small-muted" style="margin-top:8px">
+                If there are multiple documents (e.g. Plot 1, Plot 2), add them here. Use the "Continuity validated" checkbox to mark whether continuity between docs is validated.
+            </div>
+            </div>
+
+            <div style="margin-top:14px">
+            <label>Whether the property is land locked</label>
+            <select id="landLocked">
+                <option value="">Select</option>
+                <option>No</option>
+                <option>Yes</option>
+            </select>
+            </div>
+
+            <div class="row" style="margin-top:10px">
+            <div><label>Access Road Width (m)</label><input id="accessRoadWidth" type="text"></div>
+            <div><label>Type of Road</label><input id="roadType" type="text" placeholder="e.g. Asphalt / Earthen"></div>
+            <div>
+                <label>Basis for Property Identification</label>
+                <select id="basisIdentification">
+                <option value="">Select Predefined Text</option>
+                <option>Deed Description</option>
+                <option>Land Records</option>
+                <option>Google Maps / Bhuvan Reference</option>
+                <option>Site Adjoining Reference</option>
+                </select>
+            </div>
+            <div>
+                <label>Identification Remarks</label>
+                <input id="identificationRemarks" type="text" placeholder="Valuator remarks">
+            </div>
+            </div>
+
+            <div class="row" style="margin-top:10px">
+            <div>
+                <label>Is Demarcation Available</label>
+                <select id="demarcation">
+                <option value="">Select Predefined Text</option>
+                <option>Yes - Physical Pegs Observed</option>
+                <option>Partial</option>
+                <option>No</option>
+                </select>
+            </div>
+            <div><label>Demarcation Remarks</label><input id="demarcationRemarks" type="text"></div>
+            <div><label>Present Activity / Usage / Line of Business</label><input id="presentUsage" type="text"></div>
+            <div><label>Any Road Widening Marks Observed</label><select id="roadWidening"><option value="">Select</option><option>No</option><option>Yes</option></select></div>
+            </div>
+
+            <div class="row" style="margin-top:10px">
+            <div><label>Shape of the Plot</label><input id="plotShape" type="text" placeholder="Rectangular / Irregular etc."></div>
+            <div><label>Floor Level in Which Situated (if Flat)</label><input id="floorLevelFlat" type="text"></div>
+            </div>
+
+            <!-- Physical Areas (Plinth/Slab) dynamic -->
+            <div style="margin-top:14px">
+            <label>Physical Areas — Add Plinth / Slab entries (multiple)</label>
+            <div id="physicalAreasContainer"></div>
+            <div class="controls">
+                <button type="button" class="add-btn" id="addPlinthBtn">+ Add Plinth/Slab Entry</button>
+            </div>
+            <div class="small-muted" style="margin-top:8px">
+                Example entries: "Plinth Area GF", "Plinth Area FF", "Slab Area GF" etc. Provide multiple entries as needed.
+            </div>
+            </div>
+
+            <!-- Setbacks -->
+            <div style="margin-top:14px">
+            <label>Setbacks</label>
+            <div class="row">
+                <div><label>North</label><input id="setbackNorth" type="text"></div>
+                <div><label>South</label><input id="setbackSouth" type="text"></div>
+                <div><label>East</label><input id="setbackEast" type="text"></div>
+                <div><label>West</label><input id="setbackWest" type="text"></div>
+            </div>
+            </div>
+
+        </div>
+        </form>
+    </div>
+    </div>
+
+    <div class="container">
+  <h1>Property Valuation Form</h1>
+
+  <!-- 9. LAND DETAILS -->
+  <div class="section">
+    <h2>9. Land Details</h2>
+    <div class="grid">
+      <div>
+        <label>Total Land Extent as per Documents (A)</label>
+        <input id="landA" type="number" placeholder="Enter value" oninput="recalcAll()">
+      </div>
+      <div>
+        <label>Total Land Extent as per Plan (B)</label>
+        <input id="landB" type="number" placeholder="Enter value" oninput="recalcAll()">
+      </div>
+      <div>
+        <label>Total Land Extent as per Actual (C)</label>
+        <input id="landC" type="number" placeholder="Enter value" oninput="recalcAll()">
+      </div>
+      <div>
+        <label>Units</label>
+        <select id="unitSelect" onchange="recalcAll()">
+          <option value="SqYds">SqYds</option>
+          <option value="SqMts">SqMts</option>
+          <option value="Sft">Sft</option>
+          <option value="Acres">Acres</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div>
+        <label>Affected Area Type (D)</label>
+        <select id="affectedType" onchange="toggleAffectedFields(); recalcAll();">
+          <option value="road">Road Affected Area</option>
+          <option value="nala">Nala Affected Area</option>
+          <option value="both">Both</option>
+        </select>
+      </div>
+      <div id="reaWrap">
+        <label>Road Effected Area (REA)</label>
+        <input id="rea" type="number" placeholder="Enter value" oninput="recalcAll()">
+      </div>
+      <div id="neaWrap" style="display:none;">
+        <label>Nala Effected Area (NEA)</label>
+        <input id="nea" type="number" placeholder="Enter value" oninput="recalcAll()">
+      </div>
+    </div>
+
+    <div class="grid">
+      <div>
+        <label>Gross Area Source</label>
+        <select id="grossSource" onchange="recalcAll()">
+          <option value="A">Use A (Documents)</option>
+          <option value="B">Use B (Plan)</option>
+          <option value="C">Use C (Actual)</option>
+        </select>
+      </div>
+      <div>
+        <label>Net Plot Area (E)</label>
+        <input id="netArea" class="readonly" readonly>
+      </div>
+      <div>
+        <label>Area Considered for Valuation (F)</label>
+        <input id="areaVal" class="readonly" readonly>
+      </div>
+    </div>
+  </div>
+
+  <!-- LAND VALUATION -->
+  <div class="section">
+    <h2>Land Valuation</h2>
+    <div class="grid">
+      <div>
+        <label>Guideline Rate (per unit)</label>
+        <input id="guideRate" type="number" placeholder="Enter rate" oninput="updateLandTable()">
+      </div>
+      <div>
+        <label>Unit Rate (per unit)</label>
+        <input id="unitRate" type="number" placeholder="Enter rate" oninput="updateLandTable()">
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Land Area Considered</th>
+          <th>Guideline Rate</th>
+          <th>Guideline Value</th>
+          <th>Unit Rate</th>
+          <th>Land Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td id="tv_area">0</td>
+          <td id="tv_gRate">0</td>
+          <td id="tv_gValue">0</td>
+          <td id="tv_uRate">0</td>
+          <td id="tv_lValue">0</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ENQUIRIES -->
+  <div class="section">
+    <h2>Enquiries</h2>
+    <div id="enquiriesList"></div>
+    <button class="btn add" onclick="addEnquiry()">+ Add Enquiry</button>
+  </div>
+
+  <!-- BUILDING DETAILS -->
+  <div class="section">
+    <h2>Building / Floor Details</h2>
+    <table id="buildingTable">
+      <thead>
+        <tr>
+          <th>S.No</th>
+          <th>Building</th>
+          <th>Floor Name</th>
+          <th>Type</th>
+          <th>BUA (Plan)</th>
+          <th>BUA (Actual)</th>
+          <th>Permissible Area</th>
+          <th>Area Considered</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <button class="btn add" onclick="addBuildingRow()">+ Add Building Row</button>
+  </div>
+
+  <!-- BUILDING VALUATION -->
+  <div class="section">
+    <h2>Building Valuation</h2>
+    <table id="buildingValTable">
+      <thead>
+        <tr>
+          <th>S.No</th>
+          <th>Building</th>
+          <th>Floor</th>
+          <th>Type</th>
+          <th>Area Considered</th>
+          <th>Guideline Rate</th>
+          <th>Guideline Value</th>
+          <th>Unit Rate</th>
+          <th>Value of Building</th>
+          <th>Replacement Cost</th>
+          <th>Replacement Value</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <button class="btn add" onclick="addBuildingValRow()">+ Add Valuation Row</button>
+  </div>
+
+  <!-- FLAT DETAILS -->
+  <div class="section">
+    <h2>Flat Valuation</h2>
+    <div class="grid">
+      <div><label>Flat Area (SBUA)</label><input id="flatSBUA" type="number" oninput="updateFlatCalc()"></div>
+      <div><label>Carpet Area</label><input id="flatCarpet" type="number"></div>
+      <div><label>UDS of Flat</label><input id="flatUDS" type="number"></div>
+      <div><label>Total Land Area</label><input id="flatTotalLand" type="number"></div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Area</th>
+          <th>Area Considered</th>
+          <th>Guideline Rate</th>
+          <th>Guideline Value</th>
+          <th>Unit Rate</th>
+          <th>Value of Flat</th>
+          <th>Replacement Cost</th>
+          <th>Replacement Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>SBUA</td>
+          <td id="flat_area_cons">0</td>
+          <td><input id="flat_guide_rate" type="number" oninput="updateFlatCalc()"></td>
+          <td id="flat_guide_val">0</td>
+          <td><input id="flat_unit_rate" type="number" oninput="updateFlatCalc()"></td>
+          <td id="flat_value">0</td>
+          <td><input id="flat_replace_rate" type="number" oninput="updateFlatCalc()"></td>
+          <td id="flat_replace_val">0</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- REMARKS -->
+  <div class="section">
+    <h2>Comments / Remarks</h2>
+    <textarea placeholder="Enter remarks..."></textarea>
+  </div>
+</div>
+
+    <script>
+        let propertyDocCount = 1;
+        let approvalDocCount = 1;
+        let currentSanctionBodyTarget = '';
+        let currentBuildingTarget = '';
+        let currentBpsBrsTarget = '';
+        let currentLocalBodyTarget = '';
+        let currentLrsTarget = '';
+        let currentLayoutTarget = '';
+        let currentNalaTarget = '';
+        let buildingCount = 0;
+
+        // Location data
+        const locationData = {
+            "Telangana": {
+                "Hyderabad": {
+                    "Serilingampally": ["Kondapur", "Gachibowli", "Madhapur", "Miyapur"],
+                    "Kukatpally": ["Kukatpally", "Nizampet", "Bachupally", "Pragathi Nagar"],
+                    "Rajendranagar": ["Rajendranagar", "Shamshabad", "Chevella", "Moinabad"]
+                },
+                "Rangareddy": {
+                    "Shamshabad": ["Shamshabad", "Rajiv Gandhi International Airport", "Kothur"],
+                    "Chevella": ["Chevella", "Vikarabad Road", "Shankarpally"],
+                    "Ibrahimpatnam": ["Ibrahimpatnam", "Yacharam", "Pocharam"]
+                }
+            }
+        };
+
+        // Initialize form
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Property type change
+            document.getElementById('propertyType').addEventListener('change', toggleFlatFields);
+            
+            // Date validation
+            document.getElementById('valuationDate').addEventListener('change', validateDates);
+            document.getElementById('inspectionDate').addEventListener('change', validateDates);
+        }
+
+        function validateDates() {
+            const inspectionDate = document.getElementById('inspectionDate').value;
+            const valuationDate = document.getElementById('valuationDate').value;
+            const errorDiv = document.getElementById('dateError');
+            
+            if (inspectionDate && valuationDate) {
+                if (new Date(valuationDate) < new Date(inspectionDate)) {
+                    errorDiv.textContent = 'Date of Valuation must be greater than or equal to Date of Inspection';
+                    document.getElementById('valuationDate').style.borderColor = '#e74c3c';
+                    return false;
+                } else {
+                    errorDiv.textContent = '';
+                    document.getElementById('valuationDate').style.borderColor = '#ddd';
+                    return true;
+                }
+            }
+            return true;
+        }
+
+        function toggleFlatFields() {
+            const propertyType = document.getElementById('propertyType').value;
+            const flatFields = document.querySelectorAll('.flat-only');
+            const landBuildingFields = document.querySelectorAll('.land-buildings-only');
+            
+            flatFields.forEach(field => {
+                if (propertyType === 'Flat') {
+                    field.classList.remove('hidden');
+                } else {
+                    field.classList.add('hidden');
+                }
+            });
+
+            landBuildingFields.forEach(field => {
+                if (propertyType === 'Land and Buildings') {
+                    field.classList.remove('hidden');
+                } else {
+                    field.classList.add('hidden');
+                }
+            });
+        }
+
+        function addPropertyDoc() {
+            propertyDocCount++;
+            const container = document.getElementById('propertyDocsContainer');
+            const newDoc = document.createElement('div');
+            newDoc.className = 'doc-item property-doc-item';
+            newDoc.setAttribute('data-doc-id', propertyDocCount);
+            newDoc.innerHTML = `
+                <div class="doc-header">
+                    <div class="doc-title">Property Document ${propertyDocCount}</div>
+                    <button type="button" class="remove-doc-btn" onclick="removePropertyDoc(${propertyDocCount})">Remove</button>
+                </div>
+                
+                <div class="form-group">
+                    <label for="selectDoc${propertyDocCount}">Select Document *</label>
+                    <select id="selectDoc${propertyDocCount}" class="doc-select" required>
+                        <option value="">Select Document</option>
+                        <option value="AOS">AOS</option>
+                        <option value="SALE DEED">Sale Deed</option>
+                        <option value="GIFT DEED">Gift Deed</option>
+                        <option value="ANY DEED">Any Deed</option>
+                    </select>
+                </div>
+                <div id="docDetails${propertyDocCount}" class="doc-details"></div>
+                <div id="generatedSentence${propertyDocCount}" class="generated-sentence hidden"></div>
+            `;
+            container.appendChild(newDoc);
+            
+            // Add event listener to new select
+            document.getElementById(`selectDoc${propertyDocCount}`).addEventListener('change', function() {
+                handleDocumentSelect(this, propertyDocCount);
+            });
+        }
+
+        function removePropertyDoc(docId) {
+            const docElement = document.querySelector(`[data-doc-id="${docId}"].property-doc-item`);
+            if (docElement) {
+                docElement.remove();
+            }
+        }
+
+        function addApprovalDoc() {
+            approvalDocCount++;
+            const container = document.getElementById('approvalDocsContainer');
+            const newDoc = document.createElement('div');
+            newDoc.className = 'doc-item approval-doc-item';
+            newDoc.setAttribute('data-doc-id', approvalDocCount);
+            newDoc.innerHTML = `
+                <div class="doc-header">
+                    <div class="doc-title">Approval Document ${approvalDocCount}</div>
+                    <button type="button" class="remove-doc-btn" onclick="removeApprovalDoc(${approvalDocCount})">Remove</button>
+                </div>
+                
+                <div class="form-group">
+                    <label for="approvalDoc${approvalDocCount}">Select Building Approval Document *</label>
+                    <select id="approvalDoc${approvalDocCount}" class="approval-select" required>
+                        <option value="">Select Document</option>
+                        <option value="SANCTION PLAN">Sanction Plan</option>
+                        <option value="NO PLAN CASE">No Plan Case</option>
+                        <option value="BPS/BRS">BPS/BRS</option>
+                    </select>
+                </div>
+                <div id="approvalDetails${approvalDocCount}" class="approval-details"></div>
+                
+                <div class="form-group">
+                    <label for="landApprovalDoc${approvalDocCount}">Select Land Approval Document</label>
+                    <select id="landApprovalDoc${approvalDocCount}" class="land-approval-select">
+                        <option value="">Select Document</option>
+                        <option value="LRS">LRS</option>
+                        <option value="LAYOUT">Layout</option>
+                        <option value="NALA">NALA</option>
+                    </select>
+                </div>
+                <div id="landApprovalDetails${approvalDocCount}" class="land-approval-details"></div>
+            `;
+            container.appendChild(newDoc);
+            
+            // Add event listeners
+            document.getElementById(`approvalDoc${approvalDocCount}`).addEventListener('change', function() {
+                handleApprovalSelect(this, approvalDocCount);
+            });
+            
+            document.getElementById(`landApprovalDoc${approvalDocCount}`).addEventListener('change', function() {
+                handleLandApprovalSelect(this, approvalDocCount);
+            });
+        }
+
+        function removeApprovalDoc(docId) {
+            const docElement = document.querySelector(`[data-doc-id="${docId}"].approval-doc-item`);
+            if (docElement) {
+                docElement.remove();
+            }
+        }
+
+        // Event delegation for document selects
+        document.addEventListener('change', function(e) {
+            if (e.target.classList.contains('doc-select')) {
+                const docId = e.target.id.replace('selectDoc', '');
+                handleDocumentSelect(e.target, docId);
+            }
+            
+            if (e.target.classList.contains('approval-select')) {
+                const docId = e.target.id.replace('approvalDoc', '');
+                handleApprovalSelect(e.target, docId);
+            }
+            
+            if (e.target.classList.contains('land-approval-select')) {
+                const docId = e.target.id.replace('landApprovalDoc', '');
+                handleLandApprovalSelect(e.target, docId);
+            }
+        });
+
+        function handleDocumentSelect(select, docId) {
+            const selectedDoc = select.value;
+            const detailsDiv = document.getElementById(`docDetails${docId}`);
+            
+            if (selectedDoc === 'AOS') {
+                detailsDiv.innerHTML = getAOSFields(docId);
+                setupLocationDropdowns(docId);
+            } else if (selectedDoc) {
+                detailsDiv.innerHTML = getOtherDocFields(docId);
+                setupLocationDropdowns(docId);
+            } else {
+                detailsDiv.innerHTML = '';
+            }
+            
+            // Re-apply property type logic
+            toggleFlatFields();
+        }
+
+        function handleApprovalSelect(select, docId) {
+            const selectedDoc = select.value;
+            const detailsDiv = document.getElementById(`approvalDetails${docId}`);
+            
+            if (selectedDoc === 'SANCTION PLAN') {
+                currentSanctionBodyTarget = `approvalDetails${docId}`;
+                document.getElementById('sanctionBodyPopup').style.display = 'block';
+            } else if (selectedDoc === 'NO PLAN CASE') {
+                currentLocalBodyTarget = `approvalDetails${docId}`;
+                document.getElementById('localBodyPopup').style.display = 'block';
+            } else if (selectedDoc === 'BPS/BRS') {
+                currentBpsBrsTarget = `approvalDetails${docId}`;
+                document.getElementById('bpsBrsPopup').style.display = 'block';
+            } else if (selectedDoc) {
+                detailsDiv.innerHTML = `<p>Details for ${selectedDoc} will be implemented based on requirements.</p>`;
+            } else {
+                detailsDiv.innerHTML = '';
+            }
+        }
+
+        function handleLandApprovalSelect(select, docId) {
+            const selectedDoc = select.value;
+            const detailsDiv = document.getElementById(`landApprovalDetails${docId}`);
+            
+            if (selectedDoc === 'LRS') {
+                currentLrsTarget = `landApprovalDetails${docId}`;
+                document.getElementById('lrsSanctionPopup').style.display = 'block';
+            } else if (selectedDoc === 'LAYOUT') {
+                currentLayoutTarget = `landApprovalDetails${docId}`;
+                document.getElementById('layoutSanctionPopup').style.display = 'block';
+            } else if (selectedDoc === 'NALA') {
+                currentNalaTarget = `landApprovalDetails${docId}`;
+                document.getElementById('nalaDetailsPopup').style.display = 'block';
+            } else if (selectedDoc) {
+                detailsDiv.innerHTML = `<p>Details for ${selectedDoc} will be implemented based on requirements.</p>`;
+            } else {
+                detailsDiv.innerHTML = '';
+            }
+        }
+
+        function setupLocationDropdowns(docId) {
+            const stateSelect = document.getElementById(`state${docId}`);
+            const districtSelect = document.getElementById(`district${docId}`);
+            const mandalSelect = document.getElementById(`mandal${docId}`);
+            const villageSelect = document.getElementById(`village${docId}`);
+
+            if (!stateSelect) return;
+
+            // Load Districts when State changes
+            stateSelect.addEventListener("change", function () {
+                districtSelect.innerHTML = '<option value="">Select District</option>';
+                mandalSelect.innerHTML = '<option value="">Select Mandal</option>';
+                villageSelect.innerHTML = '<option value="">Select Village</option>';
+
+                const districts = locationData[this.value];
+                if (districts) {
+                    Object.keys(districts).forEach(district => {
+                        districtSelect.innerHTML += `<option value="${district}">${district}</option>`;
+                    });
+                }
+            });
+
+            // Load Mandals when District changes
+            districtSelect.addEventListener("change", function () {
+                mandalSelect.innerHTML = '<option value="">Select Mandal</option>';
+                villageSelect.innerHTML = '<option value="">Select Village</option>';
+
+                const mandals = locationData[stateSelect.value][this.value];
+                if (mandals) {
+                    Object.keys(mandals).forEach(mandal => {
+                        mandalSelect.innerHTML += `<option value="${mandal}">${mandal}</option>`;
+                    });
+                }
+            });
+
+            // Load Villages when Mandal changes
+            mandalSelect.addEventListener("change", function () {
+                villageSelect.innerHTML = '<option value="">Select Village</option>';
+
+                const villages = locationData[stateSelect.value][districtSelect.value][this.value];
+                if (villages) {
+                    villages.forEach(village => {
+                        villageSelect.innerHTML += `<option value="${village}">${village}</option>`;
+                    });
+                }
+            });
+        }
+
+        function getAOSFields(docId) {
+            return `
+                <div class="form-row">
+                    <div class="form-col">
+                        <label>Name of the Seller (vendor) *</label>
+                        <input type="text" id="seller${docId}" required>
+                    </div>
+                    <div class="form-col">
+                        <label>Name of the Purchaser (vendee) *</label>
+                        <input type="text" id="purchaser${docId}" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <label>Date of AOS *</label>
+                        <input type="date" id="aosDate${docId}" required>
+                    </div>
+                    <div class="form-col">
+                        <label>Sale Consideration (in rupees) *</label>
+                        <input type="text" id="saleConsideration${docId}" placeholder="e.g., 10,00,000" required oninput="formatCurrency(this)">
+                    </div>
+                </div>
+
+                ${getLocationFields(docId)}
+                ${getPropertyDetailsFields(docId)}
+                ${getBoundariesFields(docId)}
+
+                <button type="button" class="btn btn-generate" onclick="generateSentence(${docId})">Generate Sentence</button>
+            `;
+        }
+
+        function getOtherDocFields(docId) {
+            return `
+                <div class="form-row">
+                    <div class="form-col">
+                        <label>Name of the Owner (vendee) *</label>
+                        <input type="text" id="owner${docId}" required>
+                    </div>
+                    <div class="form-col">
+                        <label>Doc No *</label>
+                        <input type="text" id="docNo${docId}" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <label>Date of Registration *</label>
+                        <input type="date" id="regDate${docId}" required>
+                    </div>
+                    <div class="form-col">
+                        <label>SRO Name *</label>
+                        <input type="text" id="sroName${docId}" required>
+                    </div>
+                </div>
+
+                ${getLocationFields(docId)}
+                ${getPropertyDetailsFields(docId)}
+                ${getBoundariesFields(docId)}
+
+                <button type="button" class="btn btn-generate" onclick="generateSentence(${docId})">Generate Sentence</button>
+            `;
+        }
+
+        function getLocationFields(docId) {
+            return `
+                <div class="form-row">
+                    <div class="form-col">
+                        <label>State *</label>
+                        <select id="state${docId}" required>
+                            <option value="">Select State</option>
+                            <option value="Telangana">Telangana</option>
+                        </select>
+                    </div>
+                    <div class="form-col">
+                        <label>District *</label>
+                        <select id="district${docId}" required>
+                            <option value="">Select District</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <label>Mandal *</label>
+                        <select id="mandal${docId}" required>
+                            <option value="">Select Mandal</option>
+                        </select>
+                    </div>
+                    <div class="form-col">
+                        <label>Village *</label>
+                        <select id="village${docId}" required>
+                            <option value="">Select Village</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getPropertyDetailsFields(docId) {
+            return `
+                <div class="form-row land-buildings-only hidden">
+                    <div class="form-col">
+                        <label>Building Name</label>
+                        <input type="text" id="houseName${docId}">
+                    </div>
+                </div>
+
+                <div class="form-row flat-only hidden">
+                    <div class="form-col">
+                        <label>Apartment Name</label>
+                        <input type="text" id="apartmentName${docId}">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <label>Colony</label>
+                        <input type="text" id="colony${docId}">
+                    </div>
+                    <div class="form-col">
+                        <label>SY.NO *</label>
+                        <input type="text" id="syNo${docId}" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <label>Plot No *</label>
+                        <input type="text" id="plotNo${docId}" required>
+                    </div>
+                    <div class="form-col">
+                        <label>House No *</label>
+                        <input type="text" id="houseNo${docId}" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col flat-only">
+                        <label>Flat No</label>
+                        <input type="text" id="flatNo${docId}">
+                    </div>
+                    <div class="form-col">
+                        <label>Extent (in numbers) *</label>
+                        <input type="number" id="extent${docId}" step="0.01" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col flat-only">
+                        <label>Extent (UDS) (in numbers)</label>
+                        <input type="number" id="extentUDS${docId}" step="0.01">
+                    </div>
+                    <div class="form-col flat-only">
+                        <label>Total Extent (in numbers)</label>
+                        <input type="number" id="totalExtent${docId}" step="0.01">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col flat-only">
+                        <label>SBUA (in numbers)</label>
+                        <input type="number" id="sbua${docId}" step="0.01">
+                    </div>
+                </div>
+            `;
+        }
+
+        function getBoundariesFields(docId) {
+            return `
+                <div class="form-group">
+                    <label>Boundaries of Land</label>
+                    <div class="boundaries">
+                        <div>
+                            <label>North:</label>
+                            <input type="text" id="northLand${docId}">
+                        </div>
+                        <div>
+                            <label>South:</label>
+                            <input type="text" id="southLand${docId}">
+                        </div>
+                        <div>
+                            <label>East:</label>
+                            <input type="text" id="eastLand${docId}">
+                        </div>
+                        <div>
+                            <label>West:</label>
+                            <input type="text" id="westLand${docId}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group flat-only">
+                    <label>Boundaries of Flat</label>
+                    <div class="boundaries">
+                        <div>
+                            <label>North:</label>
+                            <input type="text" id="northFlat${docId}">
+                        </div>
+                        <div>
+                            <label>South:</label>
+                            <input type="text" id="southFlat${docId}">
+                        </div>
+                        <div>
+                            <label>East:</label>
+                            <input type="text" id="eastFlat${docId}">
+                        </div>
+                        <div>
+                            <label>West:</label>
+                            <input type="text" id="westFlat${docId}">
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function selectSanctionBody() {
+            const selectedBody = document.getElementById('sanctionBodySelect').value;
+            if (selectedBody && currentSanctionBodyTarget) {
+                const detailsDiv = document.getElementById(currentSanctionBodyTarget);
+                detailsDiv.innerHTML = getSanctionBodyFields(selectedBody);
+                closePopup('sanctionBodyPopup');
+            }
+        }
+
+        function selectBpsBrsBody() {
+            const selectedBody = document.getElementById('bpsBrsSelect').value;
+            if (selectedBody && currentBpsBrsTarget) {
+                const detailsDiv = document.getElementById(currentBpsBrsTarget);
+                detailsDiv.innerHTML = getBpsBrsFields(selectedBody);
+                closePopup('bpsBrsPopup');
+            }
+        }
+
+        function selectLocalBody() {
+            const selectedBody = document.getElementById('localBodySelect').value;
+            if (selectedBody && currentLocalBodyTarget) {
+                const detailsDiv = document.getElementById(currentLocalBodyTarget);
+                detailsDiv.innerHTML = getLocalBodyFields(selectedBody);
+                closePopup('localBodyPopup');
+            }
+        }
+
+        function selectLrsSanctionBody() {
+            const selectedBody = document.getElementById('lrsSanctionSelect').value;
+            if (selectedBody && currentLrsTarget) {
+                const detailsDiv = document.getElementById(currentLrsTarget);
+                detailsDiv.innerHTML = getLrsFields(selectedBody);
+                closePopup('lrsSanctionPopup');
+            }
+        }
+
+        function selectLayoutSanctionBody() {
+            const selectedBody = document.getElementById('layoutSanctionSelect').value;
+            if (selectedBody && currentLayoutTarget) {
+                const detailsDiv = document.getElementById(currentLayoutTarget);
+                detailsDiv.innerHTML = getLayoutFields(selectedBody);
+                closePopup('layoutSanctionPopup');
+            }
+        }
+
+        function getSanctionBodyFields(sanctionBody) {
+            let commonFields = `
+                <div class="form-row">
+                    <div class="form-col">
+                        <label>Date *</label>
+                        <input type="date" required>
+                    </div>
+                    <div class="form-col">
+                        <label>Valid Upto *</label>
+                        <input type="date" required>
+                    </div>
+                </div>
+                <div id="buildingsContainer${buildingCount}" class="buildings-container">
+                    <label>Sanction Buildings and Floors</label>
+                    <button type="button" class="btn" onclick="openBuildingPopup('buildingsContainer${buildingCount}')">Add Building Details</button>
+                </div>
+            `;
+
+            let specificFields = '';
+
+            switch(sanctionBody) {
+                case 'GP':
+                    specificFields = `
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>File No/Permit No/Proceeding No/Application No *</label>
+                                <input type="text" required>
+                            </div>
+                            <div class="form-col">
+                                <label>Issued By *</label>
+                                <select required>
+                                    <option value="">Select Grampanchayath</option>
+                                    <option value="GP1">Grampanchayath 1</option>
+                                    <option value="GP2">Grampanchayath 2</option>
+                                </select>
+                            </div>
+                        </div>
+                    `;
+                    break;
+
+                case 'DTCP':
+                    specificFields = `
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>File No *</label>
+                                <input type="text" required>
+                            </div>
+                            <div class="form-col">
+                                <label>Permit No/Proceeding No *</label>
+                                <input type="text" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Issued By *</label>
+                            <input type="text" value="DISTRICT TOWN AND COUNTRY PLANNING OFFICER, (_________)" required>
+                        </div>
+                    `;
+                    break;
+
+                case 'GHMC DPMS':
+                case 'GHMC-2016':
+                    specificFields = `
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>File No *</label>
+                                <input type="text" required>
+                            </div>
+                            <div class="form-col">
+                                <label>Permit No/Proceeding No *</label>
+                                <input type="text" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Issued By *</label>
+                            <input type="text" value="GHMC" readonly>
+                        </div>
+                    `;
+                    break;
+
+                case 'HMDA DPMS':
+                    specificFields = `
+                        <div class="form-group">
+                            <label>Application No/Proceeding No *</label>
+                            <input type="text" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Issued By *</label>
+                            <input type="text" value="HMDA" readonly>
+                        </div>
+                    `;
+                    break;
+
+                case 'TG BPASS':
+                    specificFields = `
+                        <div class="form-group">
+                            <label>Application No/Proceeding No *</label>
+                            <input type="text" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Issued By *</label>
+                            <input type="text" value="TG BPASS, ___________ (MUNICIPALITY/ MUNICIPAL CORPORATION)" required>
+                        </div>
+                    `;
+                    break;
+            }
+
+            buildingCount++;
+            return specificFields + commonFields;
+        }
+
+        function getBpsBrsFields(sanctionBody) {
+            let fields = '';
+            
+            switch(sanctionBody) {
+                case 'GHMC':
+                    fields = `
+                        <div class="form-group">
+                            <label>Proceeding No *</label>
+                            <input type="text" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Date *</label>
+                            <input type="date" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Issued By *</label>
+                            <input type="text" value="GHMC" readonly>
+                        </div>
+                        <div id="buildingsContainer${buildingCount}" class="buildings-container">
+                            <label>Regularized/Penalized Buildings and Floors</label>
+                            <button type="button" class="btn" onclick="openBuildingPopup('buildingsContainer${buildingCount}')">Add Building Details</button>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'HMDA':
+                    fields = `
+                        <div class="form-group">
+                            <label>Proceeding No *</label>
+                            <input type="text" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Date *</label>
+                            <input type="date" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Issued By *</label>
+                            <input type="text" value="HMDA" readonly>
+                        </div>
+                        <div id="buildingsContainer${buildingCount}" class="buildings-container">
+                            <label>Regularized/Penalized Buildings and Floors</label>
+                            <button type="button" class="btn" onclick="openBuildingPopup('buildingsContainer${buildingCount}')">Add Building Details</button>
+                        </div>
+                    `;
+                    break;
+            }
+            
+            buildingCount++;
+            return fields;
+        }
+
+        function getLocalBodyFields(localBody) {
+            let fields = '';
+            
+            switch(localBody) {
+                case 'GHMC':
+                    fields = `
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>PTI No *</label>
+                                <input type="text" required>
+                            </div>
+                            <div class="form-col">
+                                <label>Door No *</label>
+                                <input type="text" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>Name *</label>
+                                <input type="text" required>
+                            </div>
+                            <div class="form-col">
+                                <label>Paid To *</label>
+                                <input type="text" value="GHMC" readonly>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'CDMA':
+                    fields = `
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>PTI No *</label>
+                                <input type="text" required>
+                            </div>
+                            <div class="form-col">
+                                <label>Door No *</label>
+                                <input type="text" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>Name *</label>
+                                <input type="text" required>
+                            </div>
+                            <div class="form-col">
+                                <label>Paid To *</label>
+                                <input type="text" value="CDMA" readonly>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'GRAMPANCHAYATH':
+                    fields = `
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>Assessment No *</label>
+                                <input type="text" required>
+                            </div>
+                            <div class="form-col">
+                                <label>Door No *</label>
+                                <input type="text" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>Name *</label>
+                                <input type="text" required>
+                            </div>
+                            <div class="form-col">
+                                <label>Paid To *</label>
+                                <select required>
+                                    <option value="">Select Grampanchayath</option>
+                                    <option value="GP1">Grampanchayath 1</option>
+                                    <option value="GP2">Grampanchayath 2</option>
+                                </select>
+                            </div>
+                        </div>
+                    `;
+                    break;
+            }
+            
+            return fields;
+        }
+
+        function getLrsFields(sanctionBody) {
+            let fields = '';
+            
+            switch(sanctionBody) {
+                case 'GHMC':
+                    fields = `
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>Proceeding No *</label>
+                                <input type="text" required>
+                            </div>
+                            <div class="form-col">
+                                <label>Date *</label>
+                                <input type="date" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>Issued By *</label>
+                                <input type="text" value="GHMC" readonly>
+                            </div>
+                            <div class="form-col">
+                                <label>Extent *</label>
+                                <input type="number" step="0.01" required>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'HMDA':
+                    fields = `
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>Proceeding No *</label>
+                                <input type="text" required>
+                            </div>
+                            <div class="form-col">
+                                <label>Date *</label>
+                                <input type="date" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>Issued By *</label>
+                                <input type="text" value="HMDA" readonly>
+                            </div>
+                            <div class="form-col">
+                                <label>Extent *</label>
+                                <input type="number" step="0.01" required>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'MUNICIPALITY':
+                    fields = `
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>Proceeding No *</label>
+                                <input type="text" required>
+                            </div>
+                            <div class="form-col">
+                                <label>Date *</label>
+                                <input type="date" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>Issued By *</label>
+                                <select required>
+                                    <option value="">Select Municipality</option>
+                                    <option value="Municipality 1">Municipality 1</option>
+                                    <option value="Municipality 2">Municipality 2</option>
+                                </select>
+                            </div>
+                            <div class="form-col">
+                                <label>Extent *</label>
+                                <input type="number" step="0.01" required>
+                            </div>
+                        </div>
+                    `;
+                    break;
+            }
+            
+            return fields;
+        }
+
+        function getLayoutFields(sanctionBody) {
+            let fields = '';
+            
+            switch(sanctionBody) {
+                case 'HMDA FINAL LAYOUT':
+                    fields = `
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>Permit/Proceeding/File/Letter/Application No *</label>
+                                <input type="text" required>
+                            </div>
+                            <div class="form-col">
+                                <label>Date *</label>
+                                <input type="date" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Issued By *</label>
+                            <input type="text" value="HMDA" readonly>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'DTCP FINAL LAYOUT':
+                    fields = `
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>Permit/Proceeding/File/Letter/Application No *</label>
+                                <input type="text" required>
+                            </div>
+                            <div class="form-col">
+                                <label>Date *</label>
+                                <input type="date" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Issued By *</label>
+                            <input type="text" value="DTCP" readonly>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'GRAMPANCHAYATH LAYOUT':
+                    fields = `
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>Permit/Proceeding/File/Letter/Application No *</label>
+                                <input type="text" required>
+                            </div>
+                            <div class="form-col">
+                                <label>Date *</label>
+                                <input type="date" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Issued By *</label>
+                            <select required>
+                                <option value="">Select Grampanchayath</option>
+                                <option value="GP1">Grampanchayath 1</option>
+                                <option value="GP2">Grampanchayath 2</option>
+                            </select>
+                        </div>
+                    `;
+                    break;
+                    
+                case 'DRAFT LAYOUT':
+                    fields = `
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label>Permit/Proceeding/File/Letter/Application No *</label>
+                                <input type="text" required>
+                            </div>
+                            <div class="form-col">
+                                <label>Date *</label>
+                                <input type="date" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Issued By *</label>
+                            <input type="text" required>
+                        </div>
+                    `;
+                    break;
+            }
+            
+            return fields;
+        }
+
+        function openBuildingPopup(targetContainer) {
+            currentBuildingTarget = targetContainer;
+            document.getElementById('buildingDetailsPopup').style.display = 'block';
+        }
+
+        function addBuildingDetail() {
+            const buildingName = document.getElementById('buildingName').value;
+            const numberOfFloors = document.getElementById('numberOfFloors').value;
+            const buildingArea = document.getElementById('buildingArea').value;
+
+            if (buildingName && numberOfFloors && buildingArea && currentBuildingTarget) {
+                const container = document.getElementById(currentBuildingTarget);
+                const buildingDiv = document.createElement('div');
+                buildingDiv.className = 'building-item';
+                buildingDiv.innerHTML = `
+                    <button type="button" class="remove-btn" onclick="this.parentElement.remove()">&times;</button>
+                    <strong>Building:</strong> ${buildingName}<br>
+                    <strong>Floors:</strong> ${numberOfFloors}<br>
+                    <strong>Area:</strong> ${buildingArea} Sft
+                `;
+                container.appendChild(buildingDiv);
+
+                // Clear form
+                document.getElementById('buildingName').value = '';
+                document.getElementById('numberOfFloors').value = '';
+                document.getElementById('buildingArea').value = '';
+
+                closePopup('buildingDetailsPopup');
+            }
+        }
+
+        function addMoreBuildings() {
+            addBuildingDetail();
+            // Keep popup open for more entries
+            document.getElementById('buildingDetailsPopup').style.display = 'block';
+        }
+
+        function addNalaDetails() {
+            const proceeding = document.getElementById('nalaProceeding').value;
+            const syNo = document.getElementById('nalaSyNo').value;
+            const syExtent = document.getElementById('nalaSyExtent').value;
+
+            if (proceeding && syNo && syExtent && currentNalaTarget) {
+                const container = document.getElementById(currentNalaTarget);
+                container.innerHTML = `
+                    <div class="form-group">
+                        <label>Proceeding Number:</label>
+                        <input type="text" value="${proceeding}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>SY NO:</label>
+                        <input type="text" value="${syNo}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>SY NO Wise Extent:</label>
+                        <input type="number" value="${syExtent}" readonly>
+                    </div>
+                `;
+
+                // Clear form
+                document.getElementById('nalaProceeding').value = '';
+                document.getElementById('nalaSyNo').value = '';
+                document.getElementById('nalaSyExtent').value = '';
+
+                closePopup('nalaDetailsPopup');
+            }
+        }
+
+        function generateSentence(docId) {
+            const docType = document.getElementById(`selectDoc${docId}`).value;
+            let sentence = '';
+            
+            if (docType === 'AOS') {
+                const seller = document.getElementById(`seller${docId}`).value;
+                const purchaser = document.getElementById(`purchaser${docId}`).value;
+                const aosDate = document.getElementById(`aosDate${docId}`).value;
+                
+                if (seller && purchaser && aosDate) {
+                    sentence = `Copy of ${docType} dated: ${aosDate}, executed in between ${seller} and ${purchaser}`;
+                }
+            } else if (docType) {
+                const regDate = document.getElementById(`regDate${docId}`).value;
+                const owner = document.getElementById(`owner${docId}`).value;
+                
+                if (owner && regDate) {
+                    sentence = `Copy of ${docType} dated: ${regDate}, in favor of ${owner}`;
+                }
+            }
+            
+            const sentenceDiv = document.getElementById(`generatedSentence${docId}`);
+            if (sentence) {
+                sentenceDiv.textContent = sentence;
+                sentenceDiv.classList.remove('hidden');
+            } else {
+                alert('Please fill in all required fields to generate the sentence.');
+            }
+        }
+
+        function closePopup(popupId) {
+            document.getElementById(popupId).style.display = 'none';
+        }
+
+        function formatCurrency(input) {
+            let value = input.value.replace(/,/g, '');
+            if (value && !isNaN(value)) {
+                input.value = parseInt(value).toLocaleString('en-IN');
+            }
+        }
+
+        // Form submission
+        document.getElementById('propertyForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Basic validation
+            if (!validateDates()) {
+                alert('Please fix the date validation errors before submitting.');
+                return;
+            }
+            
+            // Show success message
+            const submitSection = document.querySelector('.submit-section');
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message';
+            successDiv.innerHTML = '✅ Form submitted successfully! (This is a demo - no actual submission occurred)';
+            submitSection.appendChild(successDiv);
+            
+            // Scroll to success message
+            successDiv.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Close popups when clicking outside
+        window.addEventListener('click', function(e) {
+            if (e.target.classList.contains('popup')) {
+                e.target.style.display = 'none';
+            }
+        });
+        // Dynamic District, Mandal, Village Data
+  const locationData = {
+    "Telangana": {
+      "Hyderabad": {
+        "Serilingampally": ["Kondapur", "Gachibowli"],
+        "Kukatpally": ["Miyapur", "Nizampet"]
+      },
+      "Rangareddy": {
+        "Shamshabad": ["Airport", "Kothur"],
+        "Chevella": ["Vikarabad Road", "Shankarpally"]
+      }
+    },
+    "Andhra Pradesh": {
+      "Krishna": {
+        "Vijayawada Rural": ["Poranki", "Gannavaram"]
+      }
+    }
+  };
+
+  document.getElementById('state').addEventListener('change', function() {
+    const state = this.value;
+    const district = document.getElementById('district');
+    district.innerHTML = '<option value="">Select District</option>';
+    document.getElementById('mandal').innerHTML = '<option value="">Select Mandal</option>';
+    document.getElementById('village').innerHTML = '<option value="">Select Village</option>';
+    if (state && locationData[state]) {
+      Object.keys(locationData[state]).forEach(d => {
+        district.innerHTML += `<option value="${d}">${d}</option>`;
+      });
+    }
+  });
+
+  document.getElementById('district').addEventListener('change', function() {
+    const state = document.getElementById('state').value;
+    const district = this.value;
+    const mandal = document.getElementById('mandal');
+    mandal.innerHTML = '<option value="">Select Mandal</option>';
+    document.getElementById('village').innerHTML = '<option value="">Select Village</option>';
+    if (state && district && locationData[state][district]) {
+      Object.keys(locationData[state][district]).forEach(m => {
+        mandal.innerHTML += `<option value="${m}">${m}</option>`;
+      });
+    }
+  });
+
+  document.getElementById('mandal').addEventListener('change', function() {
+    const state = document.getElementById('state').value;
+    const district = document.getElementById('district').value;
+    const mandal = this.value;
+    const village = document.getElementById('village');
+    village.innerHTML = '<option value="">Select Village</option>';
+    if (state && district && mandal && locationData[state][district][mandal]) {
+      locationData[state][district][mandal].forEach(v => {
+        village.innerHTML += `<option value="${v}">${v}</option>`;
+      });
+    }
+  });
+
+  // Add More Plot Documents
+  let plotCount = 1;
+  function addPlotDocument() {
+    plotCount++;
+    const container = document.getElementById('plotDocuments');
+    const block = document.createElement('div');
+    block.className = 'document-block';
+    block.innerHTML = `
+      <h4>Plot Document ${plotCount}</h4>
+      <div class="form-row">
+        <div><input type="text" placeholder="North Boundary"></div>
+        <div><input type="text" placeholder="South Boundary"></div>
+        <div><input type="text" placeholder="East Boundary"></div>
+        <div><input type="text" placeholder="West Boundary"></div>
+      </div>
+    `;
+    container.appendChild(block);
+  }
+
+  // Submit Form
+  document.getElementById('valuationForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    alert("Form submitted successfully!");
+  });
+  /* =========================
+   Client-side behavior JS
+   ========================= */
+
+/* ---- State / demo inspection data ----
+   In real app, inspectionCompleted & inspectionData should come from server/valuator data.
+*/
+const demoInspectionData = [
+  "Structure: RCC framed building.",
+  "No visible cracks observed in exterior.",
+  "Site dimensions match deed records (with minor +/- 0.5% variance)."
+];
+
+/* initialize dynamic components */
+document.addEventListener('DOMContentLoaded', () => {
+  // Set inspection date to today but keep read-only
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('inspectionDate').value = today;
+
+  // Wire inspection completed toggle
+  const inspectionSelect = document.getElementById('inspectionCompleted');
+  inspectionSelect.addEventListener('change', onInspectionToggle);
+  // initialize hidden by default
+  onInspectionToggle();
+
+  // Stage of construction effect on table head
+  document.getElementById('stageConstruction').addEventListener('change', updateFloorTableHeader);
+
+  // Add floor button
+  document.getElementById('addFloorBtn').addEventListener('click', addFloorRow);
+
+  // Add plot document
+  document.getElementById('addPlotDocBtn').addEventListener('click', addPlotDocument);
+
+  // Add plinth/slab entry
+  document.getElementById('addPlinthBtn').addEventListener('click', addPhysicalAreaEntry);
+
+  // add initial entries
+  addPlotDocument();        // start with 1 plot doc block
+  addPlinthBtnAction();     // ensure button bound (function defined below)
+  updateFloorTableHeader(); // initial header
+});
+
+/* ---- Online checks validation list ---- */
+const onlineChecks = [
+  { id: 'ecFiles', label: 'EC (Encumbrance Certificate)' },
+  { id: 'prohibitedFiles', label: 'Prohibited List' },
+  { id: 'glvFiles', label: 'GLV' },
+  { id: 'isroFiles', label: 'ISRO Bhuvan Sy No Confirmation' },
+  { id: 'masterPlanFiles', label: 'Master Plan' },
+  { id: 'onlineRefFiles', label: 'Online References' }
+];
+
+/* ---- Inspection toggle handler ---- */
+function onInspectionToggle() {
+  const val = document.getElementById('inspectionCompleted').value === 'true';
+  const siteBox = document.getElementById('siteDataBox');
+  if (val) {
+    siteBox.classList.remove('hidden');
+    // populate demo observations (in real app, pull from valuator submission)
+    const ul = document.getElementById('siteObservations');
+    ul.innerHTML = '';
+    demoInspectionData.forEach(it => {
+      const li = document.createElement('li'); li.textContent = it; ul.appendChild(li);
+    });
+    // lock inspection date (already read-only) — could set to valuator date
+    // For demo, we set to today or to a sample date
+    // document.getElementById('inspectionDate').value = '2025-09-13';
+  } else {
+    siteBox.classList.add('hidden');
+    document.getElementById('siteObservations').innerHTML = '';
+  }
+}
+
+/* ---- Floor table management ---- */
+let floorCount = 0;
+function updateFloorTableHeader() {
+  const stage = document.getElementById('stageConstruction').value;
+  const headRow = document.getElementById('floorHeadRow');
+  // ensure progress column exists only if Under Construction
+  const hasProgress = !!document.getElementById('progressHead');
+  if (stage === 'Under Construction' && !hasProgress) {
+    // insert Progress column before Actions
+    const th = document.createElement('th');
+    th.id = 'progressHead';
+    th.textContent = 'Progress (%)';
+    // insert as 2nd last before Actions
+    headRow.insertBefore(th, headRow.lastElementChild);
+    // add progress cell in each existing tbody row
+    document.querySelectorAll('#floorTable tbody tr').forEach(tr => {
+      const td = document.createElement('td');
+      const input = document.createElement('input'); input.type='number'; input.min=0; input.max=100; input.placeholder='0-100';
+      input.style.width='100%';
+      td.appendChild(input);
+      tr.insertBefore(td, tr.lastElementChild);
+    });
+  } else if (stage !== 'Under Construction' && hasProgress) {
+    // remove progress head
+    document.getElementById('progressHead').remove();
+    // remove progress td from each row (it's second last now)
+    document.querySelectorAll('#floorTable tbody tr').forEach(tr => {
+      // the progress cell is at index (cells.length - 2) assuming actions last
+      const cells = tr.querySelectorAll('td');
+      if (cells.length >= 2) {
+        // remove the progress column which is before last cell
+        tr.removeChild(cells[cells.length - 2]);
+      }
+    });
+  }
+}
+
+function addFloorRow(prefill = {}) {
+  floorCount++;
+  const tbody = document.querySelector('#floorTable tbody');
+  const tr = document.createElement('tr');
+  tr.dataset.floorId = floorCount;
+
+  // cells: #, Floor Name, No units, Occupancy summary, Rental value, (maybe progress), Actions
+  const tdIndex = document.createElement('td'); tdIndex.textContent = floorCount;
+  const tdName = document.createElement('td'); {
+    const input = document.createElement('input'); input.type='text'; input.placeholder='e.g. GF';
+    if (prefill.name) input.value = prefill.name;
+    tdName.appendChild(input);
+  }
+  const tdUnits = document.createElement('td'); {
+    const input = document.createElement('input'); input.type='number'; input.min=0; input.placeholder='No. of units';
+    if (prefill.units) input.value = prefill.units;
+    tdUnits.appendChild(input);
+  }
+  const tdOcc = document.createElement('td'); {
+    const input = document.createElement('input'); input.type='text'; input.placeholder='e.g. 1 rented, 1 vacant';
+    if (prefill.occ) input.value = prefill.occ;
+    tdOcc.appendChild(input);
+  }
+  const tdRent = document.createElement('td'); {
+    const input = document.createElement('input'); input.type='text'; input.placeholder='e.g. 12000 per unit';
+    if (prefill.rent) input.value = prefill.rent;
+    tdRent.appendChild(input);
+  }
+
+  // build row
+  tr.appendChild(tdIndex);
+  tr.appendChild(tdName);
+  tr.appendChild(tdUnits);
+  tr.appendChild(tdOcc);
+  tr.appendChild(tdRent);
+
+  // insert progress column if stage is under construction
+  if (document.getElementById('stageConstruction').value === 'Under Construction') {
+    const tdProgress = document.createElement('td');
+    const ip = document.createElement('input'); ip.type='number'; ip.min=0; ip.max=100; ip.placeholder='0-100';
+    tdProgress.appendChild(ip);
+    tr.appendChild(tdProgress);
+  }
+
+  // actions cell
+  const tdActions = document.createElement('td');
+  const removeBtn = document.createElement('button');
+  removeBtn.type = 'button'; removeBtn.className='remove-btn'; removeBtn.textContent='Remove';
+  removeBtn.addEventListener('click', ()=> { tr.remove(); });
+  tdActions.appendChild(removeBtn);
+  tr.appendChild(tdActions);
+
+  tbody.appendChild(tr);
+}
+
+/* helper to attempt autofill total units from unitsPerFloor */
+function autoFillUnits() {
+  const unitsText = document.getElementById('unitsPerFloor').value.trim();
+  if (!unitsText) { alert('Enter units per floor in comma separated format first'); return; }
+  const unitsArr = unitsText.split(',').map(s=>parseInt(s.trim())).filter(n=>!isNaN(n));
+  // clear existing rows
+  document.querySelectorAll('#floorTable tbody tr').forEach(r=>r.remove());
+  floorCount = 0;
+  unitsArr.forEach((u, idx) => {
+    addFloorRow({ name: `Floor ${idx+1}`, units: u, occ: '', rent: ''});
+  });
+  // set totalUnits
+  const total = unitsArr.reduce((a,b)=>a+b,0);
+  document.getElementById('totalUnits').value = total;
+}
+
+/* ---- Plot Documents management ---- */
+let plotDocCount = 0;
+function addPlotDocument(prefill = {}) {
+  plotDocCount++;
+  const container = document.getElementById('plotDocsContainer');
+  const div = document.createElement('div');
+  div.className = 'section';
+  div.style.background = '#fff';
+  div.style.marginBottom = '8px';
+  div.dataset.plotId = plotDocCount;
+  div.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <strong>Plot Document ${plotDocCount}</strong>
+      <div>
+        <button type="button" class="remove-btn" title="Remove plot">Remove</button>
+      </div>
+    </div>
+    <div class="row">
+      <div><label>Doc Reference / Sale Deed No</label><input type="text" class="plotDocRef" value="${prefill.ref||''}"></div>
+      <div><label>SY No</label><input type="text" class="plotSyNo" value="${prefill.sy||''}"></div>
+      <div><label>Plot No</label><input type="text" class="plotNo" value="${prefill.plot||''}"></div>
+      <div><label>Continuity Validated?</label>
+        <select class="plotContinuity"><option value="false">No</option><option value="true">Yes</option></select>
+      </div>
+    </div>
+    <div style="margin-top:8px;">
+      <label>Boundaries as per Document</label>
+      <div class="row">
+        <div><input class="plotBoundNorth" placeholder="North"></div>
+        <div><input class="plotBoundSouth" placeholder="South"></div>
+        <div><input class="plotBoundEast" placeholder="East"></div>
+        <div><input class="plotBoundWest" placeholder="West"></div>
+      </div>
+    </div>
+    <div style="margin-top:8px">
+      <label>Dimensions as per Document</label>
+      <div class="row">
+        <div><input class="plotDimNorth" placeholder="North dim"></div>
+        <div><input class="plotDimSouth" placeholder="South dim"></div>
+        <div><input class="plotDimEast" placeholder="East dim"></div>
+        <div><input class="plotDimWest" placeholder="West dim"></div>
+      </div>
+    </div>
+  `;
+  // bind remove
+  div.querySelector('.remove-btn').addEventListener('click', ()=> div.remove());
+  container.appendChild(div);
+}
+
+/* ---- Physical Areas (plinth/slab) entries ---- */
+let physicalAreaCount = 0;
+function addPhysicalAreaEntry(prefill = {}) {
+  physicalAreaCount++;
+  const container = document.getElementById('physicalAreasContainer');
+  const div = document.createElement('div');
+  div.style.border = '1px dashed #dfe6f3';
+  div.style.padding = '10px';
+  div.style.marginBottom = '8px';
+  div.dataset.areaId = physicalAreaCount;
+  div.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div><strong>Entry ${physicalAreaCount}</strong></div>
+      <div><button type="button" class="remove-btn">Remove</button></div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <div><label>Type (Plinth / Slab)</label><select class="paType"><option>Plinth Area</option><option>Slab Area</option></select></div>
+      <div><label>Level (GF/FF/SF)</label><input class="paLevel" type="text" value="${prefill.level||''}"></div>
+      <div><label>Area (Sft)</label><input class="paArea" type="number" step="0.01" value="${prefill.area||''}"></div>
+      <div><label>Remarks</label><input class="paRemarks" type="text" value="${prefill.remarks||''}"></div>
+    </div>
+  `;
+  div.querySelector('.remove-btn').addEventListener('click', ()=> div.remove());
+  container.appendChild(div);
+}
+
+/* ensure addPlinth button works even if bound earlier */
+function addPlinthBtnAction(){
+  const btn = document.getElementById('addPlinthBtn');
+  if (btn) btn.addEventListener('click', ()=> addPhysicalAreaEntry());
+}
+
+/* ---- Form submit validation ---- */
+document.getElementById('valuationForm').addEventListener('submit', function(evt) {
+  evt.preventDefault();
+
+  // Validate online checks: if inspection not completed -> mandatory uploads required
+  const inspectionDone = document.getElementById('inspectionCompleted').value === 'true';
+
+  // If inspection not done, require uploads
+  const missingUploads = [];
+  if (!inspectionDone) {
+    onlineChecks.forEach(item => {
+      const files = document.getElementById(item.id).files;
+      if (!files || files.length === 0) missingUploads.push(item.label);
+    });
+    if (missingUploads.length) {
+      alert('Please upload evidence for the following before submission:\n- ' + missingUploads.join('\n- '));
+      // Scroll to top/show online checks visually
+      document.getElementById('onlineChecksSection').scrollIntoView({ behavior:'smooth' });
+      return;
+    }
+  }
+
+  // Basic property details validation (example: property type, stage)
+  const propertyType = document.getElementById('propertyType').value;
+  const stage = document.getElementById('stageConstruction').value;
+  if (!propertyType) { alert('Please select Property Type.'); document.getElementById('propertyType').focus(); return; }
+  if (!stage) { alert('Please select Stage of Construction.'); document.getElementById('stageConstruction').focus(); return; }
+
+  // Optional: Validate floors exist if units reported
+  const totalUnits = document.getElementById('totalUnits').value;
+  if (totalUnits && totalUnits > 0) {
+    const floorRows = document.querySelectorAll('#floorTable tbody tr');
+    if (floorRows.length === 0) {
+      if (!confirm('Total units is set but no floor details added. Continue anyway?')) return;
+    }
+  }
+
+  // Other checks can be added according to your business rules
+  // For demo -> gather payload, show summary
+  const payloadSummary = collectSummary();
+  // Show summary in alert (or send to server)
+  if (confirm('Submit form? Click OK to view a brief summary.')) {
+    alert(payloadSummary);
+    // In real system, send FormData including files to backend here.
+    // Example: let fd = new FormData(document.getElementById('valuationForm')); fetch('/upload', {method:'POST', body:fd});
+  }
+});
+
+/* ---- helper to collect summary ---- */
+function collectSummary(){
+  const lines = [];
+  lines.push('Property Type: ' + document.getElementById('propertyType').value);
+  lines.push('Stage: ' + document.getElementById('stageConstruction').value);
+  lines.push('Coordinates: ' + document.getElementById('coordinates').value);
+  lines.push('Nearby Landmark: ' + document.getElementById('nearbyLandmark').value);
+  lines.push('No of Floors: ' + document.getElementById('numFloors').value);
+  lines.push('Total Units: ' + document.getElementById('totalUnits').value);
+  lines.push('Occupancy Status: ' + document.getElementById('occupancyStatus').value);
+  // count plot docs
+  lines.push('Plot Documents: ' + document.querySelectorAll('#plotDocsContainer > .section').length);
+  // physical area entries
+  lines.push('Plinth/Slab entries: ' + document.querySelectorAll('#physicalAreasContainer > div').length);
+  return lines.join('\n');
+}
+
+/* ========== Optional: small UX helpers ========== */
+/* mark file inputs with count on change */
+onlineChecks.forEach(item => {
+  const el = document.getElementById(item.id);
+  if (el) {
+    el.addEventListener('change', function(){
+      const count = this.files ? this.files.length : 0;
+      // show simple filename count (append small text)
+      if (this.nextSibling && this.nextSibling.classList && this.nextSibling.classList.contains('small')) {
+        // reuse
+      } else {
+        const span = document.createElement('div'); span.className = 'small'; span.style.marginTop='6px';
+        this.parentNode.appendChild(span);
+      }
+      this.parentNode.querySelector('.small').textContent = count ? `${count} file(s) selected` : 'No files selected';
+    });
+  }
+});
+function toNum(v){return parseFloat(v)||0;}
+function fmt(n){return Number(n).toLocaleString(undefined,{maximumFractionDigits:2});}
+
+// Toggle REA/NEA
+function toggleAffectedFields() {
+  const type = document.getElementById('affectedType').value;
+  document.getElementById('reaWrap').style.display = (type === 'road' || type === 'both') ? 'block' : 'none';
+  document.getElementById('neaWrap').style.display = (type === 'nala' || type === 'both') ? 'block' : 'none';
+}
+
+// Recalculate Land Area
+function recalcAll() {
+  const A = toNum(document.getElementById('landA').value);
+  const B = toNum(document.getElementById('landB').value);
+  const C = toNum(document.getElementById('landC').value);
+  const source = document.getElementById('grossSource').value;
+  const gross = source === 'A' ? A : source === 'B' ? B : C;
+
+  const type = document.getElementById('affectedType').value;
+  const rea = (type === 'road' || type === 'both') ? toNum(document.getElementById('rea').value) : 0;
+  const nea = (type === 'nala' || type === 'both') ? toNum(document.getElementById('nea').value) : 0;
+  const deductions = rea + nea;
+
+  const netArea = gross - deductions;
+
+  document.getElementById('netArea').value = netArea > 0 ? netArea : 0;
+  document.getElementById('areaVal').value = netArea > 0 ? netArea : 0;
+
+  updateLandTable();
+}
+
+// Update Land Valuation
+function updateLandTable() {
+  const area = toNum(document.getElementById('areaVal').value);
+  const gRate = toNum(document.getElementById('guideRate').value);
+  const uRate = toNum(document.getElementById('unitRate').value);
+
+  document.getElementById('tv_area').innerText = fmt(area);
+  document.getElementById('tv_gRate').innerText = fmt(gRate);
+  document.getElementById('tv_gValue').innerText = fmt(area * gRate);
+  document.getElementById('tv_uRate').innerText = fmt(uRate);
+  document.getElementById('tv_lValue').innerText = fmt(area * uRate);
+}
+
+// Enquiries dynamic form
+let enqCount = 0;
+function addEnquiry() {
+  enqCount++;
+  const div = document.createElement('div');
+  div.className = 'section';
+  div.innerHTML = `
+    <div class="grid">
+      <div><label>Per Sqyd</label><input type="number" class="perSqyd" oninput="calcEnquiry(this)"></div>
+      <div><label>Plot Area</label><input type="number" class="plotArea" oninput="calcEnquiry(this)"></div>
+      <div><label>Total Value</label><input type="number" class="totalValue readonly" readonly></div>
+    </div>
+    <button class="btn remove" onclick="this.parentElement.remove()">Remove Enquiry</button>
+  `;
+  document.getElementById('enquiriesList').appendChild(div);
+}
+
+// Calculate value inside enquiry
+function calcEnquiry(el) {
+  const box = el.closest('.section');
+  const area = toNum(box.querySelector('.plotArea').value);
+  const rate = toNum(box.querySelector('.perSqyd').value);
+  box.querySelector('.totalValue').value = area * rate;
+}
+
+// Building rows
+let buildCount = 0;
+function addBuildingRow() {
+  buildCount++;
+  const tbody = document.querySelector('#buildingTable tbody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td>${buildCount}</td>
+    <td><input></td>
+    <td><input></td>
+    <td><input></td>
+    <td><input type="number"></td>
+    <td><input type="number"></td>
+    <td><input type="number"></td>
+    <td><input type="number"></td>
+  `;
+  tbody.appendChild(tr);
+}
+
+// Building valuation rows
+let buildValCount = 0;
+function addBuildingValRow() {
+  buildValCount++;
+  const tbody = document.querySelector('#buildingValTable tbody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td>${buildValCount}</td>
+    <td><input></td>
+    <td><input></td>
+    <td><input></td>
+    <td><input type="number" class="b_area" oninput="calcBuildingVal(this)"></td>
+    <td><input type="number" class="b_gRate" oninput="calcBuildingVal(this)"></td>
+    <td class="b_gValue">0</td>
+    <td><input type="number" class="b_uRate" oninput="calcBuildingVal(this)"></td>
+    <td class="b_value">0</td>
+    <td><input type="number" class="b_rRate" oninput="calcBuildingVal(this)"></td>
+    <td class="b_rValue">0</td>
+  `;
+  tbody.appendChild(tr);
+}
+
+function calcBuildingVal(el) {
+  const tr = el.closest('tr');
+  const area = toNum(tr.querySelector('.b_area').value);
+  const gRate = toNum(tr.querySelector('.b_gRate').value);
+  const uRate = toNum(tr.querySelector('.b_uRate').value);
+  const rRate = toNum(tr.querySelector('.b_rRate').value);
+  tr.querySelector('.b_gValue').innerText = fmt(area * gRate);
+  tr.querySelector('.b_value').innerText = fmt(area * uRate);
+  tr.querySelector('.b_rValue').innerText = fmt(area * rRate);
+}
+
+// Flat calculations
+function updateFlatCalc() {
+  const sbua = toNum(document.getElementById('flatSBUA').value);
+  const gRate = toNum(document.getElementById('flat_guide_rate').value);
+  const uRate = toNum(document.getElementById('flat_unit_rate').value);
+  const rRate = toNum(document.getElementById('flat_replace_rate').value);
+
+  document.getElementById('flat_area_cons').innerText = fmt(sbua);
+  document.getElementById('flat_guide_val').innerText = fmt(sbua * gRate);
+  document.getElementById('flat_value').innerText = fmt(sbua * uRate);
+  document.getElementById('flat_replace_val').innerText = fmt(sbua * rRate);
+}
+    </script>
+</body>
+</html>
